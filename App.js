@@ -25,6 +25,7 @@ const COLORS = {
   border: '#E5E7EB',
   online: '#22C55E',
   offline: '#9CA3AF',
+  error: '#DC2626',
 };
 
 const BIO =
@@ -39,14 +40,34 @@ function formatCount(n) {
   return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 }
 
+// BONUS: reusable Tag component
+function Tag({ label, selected, onPress }) {
+  return (
+    <Pressable
+      style={({ pressed }) => [
+        styles.tag,
+        selected && styles.tagSelected,
+        pressed && styles.pressed,
+      ]}
+      onPress={onPress}
+    >
+      <Text style={[styles.tagText, selected && styles.tagTextSelected]}>{label}</Text>
+    </Pressable>
+  );
+}
+
 export default function App() {
   // STEP 3: state for follow / unfollow
   const [isFollowing, setIsFollowing] = useState(false);
+  // BONUS: the Follow button is disabled for 2 seconds after pressing it
+  const [isBusy, setIsBusy] = useState(false);
 
   // STEP 4: state for the message composer
   const [isComposerOpen, setIsComposerOpen] = useState(false);
   const [message, setMessage] = useState('');
   const isSendDisabled = message.trim().length === 0;
+  // BONUS: error when the message reaches the maximum length
+  const isMaxReached = message.length >= MAX_MESSAGE;
 
   // STEP 5: state for the bio, the online status and the selected skills
   const [isBioExpanded, setIsBioExpanded] = useState(false);
@@ -65,6 +86,8 @@ export default function App() {
   // STEP 3: handleFollowPress toggles the follow state
   const handleFollowPress = () => {
     setIsFollowing(!isFollowing);
+    setIsBusy(true);
+    setTimeout(() => setIsBusy(false), 2000);
   };
 
   // STEP 4: Message button opens / closes the composer
@@ -149,24 +172,14 @@ export default function App() {
 
           {/* STEP 5: selectable skills (Pressable + array state) */}
           <View style={styles.tags}>
-            {SKILLS.map((skill) => {
-              const isSelected = selectedSkills.includes(skill);
-              return (
-                <Pressable
-                  key={skill}
-                  style={({ pressed }) => [
-                    styles.tag,
-                    isSelected && styles.tagSelected,
-                    pressed && styles.pressed,
-                  ]}
-                  onPress={() => handleSkillPress(skill)}
-                >
-                  <Text style={[styles.tagText, isSelected && styles.tagTextSelected]}>
-                    {skill}
-                  </Text>
-                </Pressable>
-              );
-            })}
+            {SKILLS.map((skill) => (
+              <Tag
+                key={skill}
+                label={skill}
+                selected={selectedSkills.includes(skill)}
+                onPress={() => handleSkillPress(skill)}
+              />
+            ))}
           </View>
           <Text style={styles.hint}>
             Tap a skill to select it · {selectedSkills.length} selected
@@ -179,9 +192,10 @@ export default function App() {
                 styles.button,
                 styles.buttonPrimary,
                 isFollowing && styles.buttonFollowing,
-                pressed && styles.pressed,
+                (pressed || isBusy) && styles.pressed,
               ]}
               onPress={handleFollowPress}
+              disabled={isBusy}
             >
               <Text
                 style={[styles.buttonText, !isFollowing && styles.buttonTextPrimary]}
@@ -210,6 +224,7 @@ export default function App() {
                 placeholder="Write a message..."
                 placeholderTextColor={COLORS.muted}
               />
+              {isMaxReached && <Text style={styles.error}>Maximum length reached</Text>}
               <View style={styles.composerFooter}>
                 <Text style={styles.counter}>
                   {message.length}/{MAX_MESSAGE} characters
@@ -425,6 +440,11 @@ const styles = StyleSheet.create({
   counter: {
     fontSize: 12,
     color: COLORS.muted,
+  },
+  error: {
+    marginTop: 6,
+    fontSize: 12,
+    color: COLORS.error,
   },
   hint: {
     marginTop: 8,
