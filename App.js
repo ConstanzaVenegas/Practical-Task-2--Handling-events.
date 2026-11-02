@@ -48,6 +48,11 @@ export default function App() {
   const [message, setMessage] = useState('');
   const isSendDisabled = message.trim().length === 0;
 
+  // STEP 5: state for the bio, the online status and the selected skills
+  const [isBioExpanded, setIsBioExpanded] = useState(false);
+  const [isOnline, setIsOnline] = useState(true);
+  const [selectedSkills, setSelectedSkills] = useState([]);
+
   // STEP 3: followers is a derived value (not a second state)
   const followers = BASE_FOLLOWERS + (isFollowing ? 1 : 0);
   const stats = [
@@ -78,7 +83,23 @@ export default function App() {
     setIsComposerOpen(false);
   };
 
-  // TODO STEP 5: add the state for the bio, the online status and the selected skills
+  // STEP 5: bio, online status and skills
+  const handleBioPress = () => {
+    setIsBioExpanded(!isBioExpanded);
+  };
+
+  const handleAvatarPress = () => {
+    setIsOnline(!isOnline);
+  };
+
+  // Never mutate the array: create a new one with filter or spread
+  const handleSkillPress = (skill) => {
+    if (selectedSkills.includes(skill)) {
+      setSelectedSkills(selectedSkills.filter((item) => item !== skill));
+    } else {
+      setSelectedSkills([...selectedSkills, skill]);
+    }
+  };
 
   return (
     <ScrollView
@@ -94,11 +115,11 @@ export default function App() {
         />
         <View style={styles.body}>
           <View style={styles.headerRow}>
-            {/* TODO STEP 5: make the avatar pressable to toggle the online status */}
-            <View>
+            {/* STEP 5: the avatar is pressable and toggles the online status */}
+            <Pressable onPress={handleAvatarPress}>
               <Image source={require('./assets/avatar.png')} style={styles.avatar} />
-              <View style={styles.onlineBadge} />
-            </View>
+              <View style={[styles.onlineBadge, !isOnline && styles.offlineBadge]} />
+            </Pressable>
             <View style={styles.headerText}>
               <Text style={styles.name}>Alex Rivera</Text>
               <Text style={styles.role}>Mobile Developer</Text>
@@ -106,10 +127,13 @@ export default function App() {
             </View>
           </View>
 
-          {/* TODO STEP 5: add a 'Read more' / 'Show less' link to expand the bio */}
-          <Text style={styles.bio} numberOfLines={3}>
+          {/* STEP 5: 'Read more' / 'Show less' link to expand the bio */}
+          <Text style={styles.bio} numberOfLines={isBioExpanded ? undefined : 3}>
             {BIO}
           </Text>
+          <Pressable onPress={handleBioPress}>
+            <Text style={styles.link}>{isBioExpanded ? 'Show less' : 'Read more'}</Text>
+          </Pressable>
 
           <View style={styles.statsRow}>
             {stats.map((item, index) => (
@@ -123,14 +147,30 @@ export default function App() {
             ))}
           </View>
 
-          {/* TODO STEP 5: make the skills selectable (Pressable + array state) */}
+          {/* STEP 5: selectable skills (Pressable + array state) */}
           <View style={styles.tags}>
-            {SKILLS.map((skill) => (
-              <View key={skill} style={styles.tag}>
-                <Text style={styles.tagText}>{skill}</Text>
-              </View>
-            ))}
+            {SKILLS.map((skill) => {
+              const isSelected = selectedSkills.includes(skill);
+              return (
+                <Pressable
+                  key={skill}
+                  style={({ pressed }) => [
+                    styles.tag,
+                    isSelected && styles.tagSelected,
+                    pressed && styles.pressed,
+                  ]}
+                  onPress={() => handleSkillPress(skill)}
+                >
+                  <Text style={[styles.tagText, isSelected && styles.tagTextSelected]}>
+                    {skill}
+                  </Text>
+                </Pressable>
+              );
+            })}
           </View>
+          <Text style={styles.hint}>
+            Tap a skill to select it · {selectedSkills.length} selected
+          </Text>
 
           {/* STEPS 1-3: Pressable buttons with onPress, pressed feedback and follow toggle */}
           <View style={styles.actions}>
