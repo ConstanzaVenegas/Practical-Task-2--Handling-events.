@@ -1,7 +1,17 @@
 // TASK 2 — Interactive Profile Card (starter)
 // Start point: the solution of Task 1 + the new data. Follow the steps in README.md.
 // TODO: add the imports you need in each step (Pressable, Button, Alert, TextInput, useState...)
-import { View, Text, Image, ScrollView, StyleSheet, Platform } from 'react-native';
+import {
+  View,
+  Text,
+  Image,
+  ScrollView,
+  StyleSheet,
+  Platform,
+  Pressable,
+  Button,
+  Alert,
+} from 'react-native';
 
 const COLORS = {
   background: '#EEF1F6',
@@ -36,7 +46,19 @@ export default function App() {
     { label: 'Following', value: '180' },
   ];
 
-  // TODO STEP 1: write the event handlers (handleFollowPress, handleMessagePress, handleSharePress)
+  // STEP 1: event handlers (for now each one shows an alert)
+  const handleFollowPress = () => {
+    Alert.alert('Follow', 'You pressed the Follow button');
+  };
+
+  const handleMessagePress = () => {
+    Alert.alert('Message', 'You pressed the Message button');
+  };
+
+  const handleSharePress = () => {
+    Alert.alert('Share profile', 'You pressed the Share profile button');
+  };
+
   // TODO STEP 3: add the state for follow / unfollow (useState)
   // TODO STEP 4: add the state for the message composer
   // TODO STEP 5: add the state for the bio, the online status and the selected skills
@@ -97,17 +119,34 @@ export default function App() {
                 STEP 2: give them visual feedback with the style function (pressed).
                 STEP 3: make the Follow button toggle between 'Follow' and 'Following'. */}
           <View style={styles.actions}>
-            <View style={[styles.button, styles.buttonPrimary]}>
+            <Pressable
+              style={({ pressed }) => [
+                styles.button,
+                styles.buttonPrimary,
+                pressed && styles.pressed,
+              ]}
+              onPress={handleFollowPress}
+            >
               <Text style={[styles.buttonText, styles.buttonTextPrimary]}>Follow</Text>
-            </View>
-            <View style={styles.button}>
+            </Pressable>
+            <Pressable
+              style={({ pressed }) => [styles.button, pressed && styles.pressed]}
+              onPress={handleMessagePress}
+            >
               <Text style={styles.buttonText}>Message</Text>
-            </View>
+            </Pressable>
           </View>
 
           {/* TODO STEP 4: when 'Message' is pressed, show a composer here (TextInput + counter + Send) */}
 
-          {/* TODO STEP 1: add a 'Share profile' Button (core component) here */}
+          {/* STEP 1: 'Share profile' core Button (inside a View because Button has no style prop) */}
+          <View style={styles.shareWrapper}>
+            <Button
+              title="Share profile"
+              color={COLORS.primary}
+              onPress={handleSharePress}
+            />
+          </View>
         </View>
       </View>
     </ScrollView>
@@ -188,9 +227,13 @@ const styles = StyleSheet.create({
   },
   role: {
     fontSize: 15,
-    fontWeight: '600',
     color: COLORS.primary,
     marginTop: 2,
+    ...Platform.select({
+      android: { fontFamily: 'sans-serif-medium' },
+      ios: { fontWeight: '600' },
+      default: { fontWeight: '600' },
+    }),
   },
   location: {
     fontSize: 13,
@@ -243,8 +286,12 @@ const styles = StyleSheet.create({
   },
   tagText: {
     fontSize: 12,
-    fontWeight: '600',
     color: COLORS.primary,
+    ...Platform.select({
+      android: { fontFamily: 'sans-serif-medium' },
+      ios: { fontWeight: '600' },
+      default: { fontWeight: '600' },
+    }),
   },
   actions: {
     flexDirection: 'row',
@@ -264,10 +311,88 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     fontSize: 15,
-    fontWeight: '600',
     color: COLORS.primary,
+    ...Platform.select({
+      android: { fontFamily: 'sans-serif-medium' },
+      ios: { fontWeight: '600' },
+      default: { fontWeight: '600' },
+    }),
   },
   buttonTextPrimary: {
+    color: '#FFFFFF',
+  },
+  buttonFollowing: {
+    backgroundColor: COLORS.primaryLight,
+  },
+  composer: {
+    marginTop: 16,
+  },
+  composerFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 8,
+  },
+  counter: {
+    fontSize: 12,
+    color: COLORS.muted,
+  },
+  hint: {
+    marginTop: 8,
+    fontSize: 12,
+    color: COLORS.muted,
+  },
+  input: {
+    height: 44,
+    paddingHorizontal: 12,
+    fontSize: 15,
+    color: COLORS.text,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    borderRadius: 12,
+  },
+  link: {
+    marginTop: 4,
+    fontSize: 14,
+    color: COLORS.primary,
+    ...Platform.select({
+      android: { fontFamily: 'sans-serif-medium' },
+      ios: { fontWeight: '600' },
+      default: { fontWeight: '600' },
+    }),
+  },
+  offlineBadge: {
+    backgroundColor: COLORS.offline,
+  },
+  pressed: {
+    opacity: 0.6,
+  },
+  sendButton: {
+    paddingHorizontal: 20,
+    paddingVertical: 8,
+    borderRadius: 10,
+    backgroundColor: COLORS.primary,
+  },
+  sendButtonDisabled: {
+    backgroundColor: COLORS.offline,
+  },
+  sendText: {
+    fontSize: 14,
+    color: '#FFFFFF',
+    ...Platform.select({
+      android: { fontFamily: 'sans-serif-medium' },
+      ios: { fontWeight: '600' },
+      default: { fontWeight: '600' },
+    }),
+  },
+  shareWrapper: {
+    marginTop: 12,
+    alignItems: 'center',
+  },
+  tagSelected: {
+    backgroundColor: COLORS.primary,
+  },
+  tagTextSelected: {
     color: '#FFFFFF',
   },
 });
