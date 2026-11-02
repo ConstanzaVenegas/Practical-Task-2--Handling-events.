@@ -1,6 +1,7 @@
 // TASK 2 — Interactive Profile Card (starter)
 // Start point: the solution of Task 1 + the new data. Follow the steps in README.md.
 // TODO: add the imports you need in each step (Pressable, Button, Alert, TextInput, useState...)
+import { useState } from 'react';
 import {
   View,
   Text,
@@ -38,17 +39,21 @@ function formatCount(n) {
 }
 
 export default function App() {
-  // STEP 3: followers must grow by 1 while you are following
-  const followers = BASE_FOLLOWERS;
+  // STEP 3: state for follow / unfollow
+  const [isFollowing, setIsFollowing] = useState(false);
+
+  // STEP 3: followers is a derived value (not a second state)
+  const followers = BASE_FOLLOWERS + (isFollowing ? 1 : 0);
   const stats = [
     { label: 'Projects', value: '24' },
     { label: 'Followers', value: formatCount(followers) },
     { label: 'Following', value: '180' },
   ];
 
-  // STEP 1: event handlers (for now each one shows an alert)
+  // STEP 1: event handlers
+  // STEP 3: handleFollowPress toggles the follow state
   const handleFollowPress = () => {
-    Alert.alert('Follow', 'You pressed the Follow button');
+    setIsFollowing(!isFollowing);
   };
 
   const handleMessagePress = () => {
@@ -58,8 +63,6 @@ export default function App() {
   const handleSharePress = () => {
     Alert.alert('Share profile', 'You pressed the Share profile button');
   };
-
-  // TODO STEP 3: add the state for follow / unfollow (useState)
   // TODO STEP 4: add the state for the message composer
   // TODO STEP 5: add the state for the bio, the online status and the selected skills
 
@@ -123,11 +126,16 @@ export default function App() {
               style={({ pressed }) => [
                 styles.button,
                 styles.buttonPrimary,
+                isFollowing && styles.buttonFollowing,
                 pressed && styles.pressed,
               ]}
               onPress={handleFollowPress}
             >
-              <Text style={[styles.buttonText, styles.buttonTextPrimary]}>Follow</Text>
+              <Text
+                style={[styles.buttonText, !isFollowing && styles.buttonTextPrimary]}
+              >
+                {isFollowing ? 'Following' : 'Follow'}
+              </Text>
             </Pressable>
             <Pressable
               style={({ pressed }) => [styles.button, pressed && styles.pressed]}
