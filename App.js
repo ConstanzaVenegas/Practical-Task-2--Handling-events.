@@ -12,6 +12,7 @@ import {
   Pressable,
   Button,
   Alert,
+  TextInput,
 } from 'react-native';
 
 const COLORS = {
@@ -31,7 +32,7 @@ const BIO =
 
 const SKILLS = ['React Native', 'JavaScript', 'UI Design', 'Git', 'Flexbox'];
 const BASE_FOLLOWERS = 1200;
-// TODO STEP 4: const MAX_MESSAGE = 140;
+const MAX_MESSAGE = 140;
 
 // Adds thousands separators: 1200 -> '1,200'
 function formatCount(n) {
@@ -41,6 +42,11 @@ function formatCount(n) {
 export default function App() {
   // STEP 3: state for follow / unfollow
   const [isFollowing, setIsFollowing] = useState(false);
+
+  // STEP 4: state for the message composer
+  const [isComposerOpen, setIsComposerOpen] = useState(false);
+  const [message, setMessage] = useState('');
+  const isSendDisabled = message.trim().length === 0;
 
   // STEP 3: followers is a derived value (not a second state)
   const followers = BASE_FOLLOWERS + (isFollowing ? 1 : 0);
@@ -56,14 +62,22 @@ export default function App() {
     setIsFollowing(!isFollowing);
   };
 
+  // STEP 4: Message button opens / closes the composer
   const handleMessagePress = () => {
-    Alert.alert('Message', 'You pressed the Message button');
+    setIsComposerOpen(!isComposerOpen);
   };
 
   const handleSharePress = () => {
     Alert.alert('Share profile', 'You pressed the Share profile button');
   };
-  // TODO STEP 4: add the state for the message composer
+
+  // STEP 4: send the message, clear it and close the composer
+  const handleSendPress = () => {
+    Alert.alert('Message sent', message);
+    setMessage('');
+    setIsComposerOpen(false);
+  };
+
   // TODO STEP 5: add the state for the bio, the online status and the selected skills
 
   return (
@@ -118,9 +132,7 @@ export default function App() {
             ))}
           </View>
 
-          {/* TODO STEP 1-3: turn these two Views into Pressable components with onPress.
-                STEP 2: give them visual feedback with the style function (pressed).
-                STEP 3: make the Follow button toggle between 'Follow' and 'Following'. */}
+          {/* STEPS 1-3: Pressable buttons with onPress, pressed feedback and follow toggle */}
           <View style={styles.actions}>
             <Pressable
               style={({ pressed }) => [
@@ -141,11 +153,41 @@ export default function App() {
               style={({ pressed }) => [styles.button, pressed && styles.pressed]}
               onPress={handleMessagePress}
             >
-              <Text style={styles.buttonText}>Message</Text>
+              <Text style={styles.buttonText}>
+                {isComposerOpen ? 'Close' : 'Message'}
+              </Text>
             </Pressable>
           </View>
 
-          {/* TODO STEP 4: when 'Message' is pressed, show a composer here (TextInput + counter + Send) */}
+          {/* STEP 4: composer (conditional rendering) */}
+          {isComposerOpen && (
+            <View style={styles.composer}>
+              <TextInput
+                style={styles.input}
+                value={message}
+                onChangeText={(newText) => setMessage(newText)}
+                maxLength={MAX_MESSAGE}
+                placeholder="Write a message..."
+                placeholderTextColor={COLORS.muted}
+              />
+              <View style={styles.composerFooter}>
+                <Text style={styles.counter}>
+                  {message.length}/{MAX_MESSAGE} characters
+                </Text>
+                <Pressable
+                  style={({ pressed }) => [
+                    styles.sendButton,
+                    isSendDisabled && styles.sendButtonDisabled,
+                    pressed && styles.pressed,
+                  ]}
+                  onPress={handleSendPress}
+                  disabled={isSendDisabled}
+                >
+                  <Text style={styles.sendText}>Send</Text>
+                </Pressable>
+              </View>
+            </View>
+          )}
 
           {/* STEP 1: 'Share profile' core Button (inside a View because Button has no style prop) */}
           <View style={styles.shareWrapper}>
@@ -160,7 +202,6 @@ export default function App() {
     </ScrollView>
   );
 }
-
 const cardShadow = Platform.select({
   ios: {
     shadowColor: '#000000',
